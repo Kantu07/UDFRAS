@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UDFRAS - Phase 1 Forensic Dashboard & Progress</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0e17;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --primary: #06b6d4;
+      --primary-glow: rgba(6, 182, 212, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --amber: #f59e0b;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .status-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tag-emerald {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .tag-primary {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .github-btn {
+      background: #1f2937;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .github-btn:hover {
+      background: #374151;
+      border-color: #4b5563;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Stats Banner */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .stat-desc {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tab-button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      color: var(--text-main);
+    }
+
+    .tab-button.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Sections */
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .panel-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Video Evidence Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .video-card {
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .video-frame {
+      width: 100%;
+      background: #000;
+      display: block;
+      max-height: 320px;
+      object-fit: cover;
+    }
+
+    .video-meta {
+      padding: 1.25rem;
+    }
+
+    .video-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .video-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .meta-table {
+      width: 100%;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+
+    .meta-table tr {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .meta-table td {
+      padding: 0.4rem 0;
+    }
+
+    .meta-table td:first-child {
+      color: var(--text-muted);
+      width: 32%;
+    }
+
+    .meta-table td:last-child {
+      color: #e5e7eb;
+      word-break: break-all;
+    }
+
+    .hash-highlight {
+      color: var(--emerald) !important;
+      font-weight: 600;
+    }
+
+    /* 7-Day Roadmap Grid */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .day-btn {
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1rem 0.75rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .day-btn:hover {
+      border-color: #374151;
+    }
+
+    .day-btn.active {
+      border-color: var(--primary);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    .day-num {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .day-headline {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .day-detail-box {
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    /* Hex Scanner */
+    .scanner-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .hex-box {
+      background: #05080f;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #93c5fd;
+      overflow-x: auto;
+    }
+
+    .scanner-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .select-input {
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+    }
+
+    /* Chain of Custody */
+    .timeline-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .timeline-node {
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      border-left: 4px solid var(--emerald);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+    }
+
+    .badge-coc {
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    .time-coc {
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 1.5rem 2rem;
+      background: rgba(17, 24, 39, 0.4);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-badge">DF</div>
+      <div>
+        <div class="brand-title">UDFRAS · DVR Forensic Platform</div>
+        <div class="brand-sub">SIH26150 — Multi-Vendor DVR/NVR Forensic Analysis Tool</div>
+      </div>
+    </div>
+
+    <div class="status-tags">
+      <span class="tag tag-emerald">
+        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981;"></span>
+        PHASE 1 IN PROGRESS
+      </span>
+      <span class="tag tag-primary">WEEK 1 SPRINT</span>
+      <a href="https://github.com/Kantu07/UDFRAS" target="_blank" class="github-btn">
+        <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+        GitHub Repository
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <!-- Stats Row -->
+    <section class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Current Phase</div>
+        <div class="stat-value" style="color: var(--primary);">Phase 1</div>
+        <div class="stat-desc">Evidence Ingestion & Auto-Detect</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Ingested Cameras</div>
+        <div class="stat-value">02</div>
+        <div class="stat-desc">CAM01 & CAM02 cataloged</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Integrity Status</div>
+        <div class="stat-value" style="color: var(--emerald);">VERIFIED</div>
+        <div class="stat-desc">Dual Hashing (SHA-256 + MD5)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Remaining Scope</div>
+        <div class="stat-value">5 Phases</div>
+        <div class="stat-desc">Parsing, Carving, Timeline, AI, Report</div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-button active" onclick="showTab('videos')">📹 CCTV Video Evidence (Live Player)</button>
+      <button class="tab-button" onclick="showTab('roadmap')">📅 Week 1 Roadmap (Days 1–7)</button>
+      <button class="tab-button" onclick="showTab('scanner')">🔍 Header Signature Scanner</button>
+      <button class="tab-button" onclick="showTab('custody')">📜 Genesis Chain of Custody</button>
+    </div>
+
+    <!-- TAB 1: Live Video Evidence -->
+    <div id="tab-videos" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Ingested Surveillance Evidence (Channel Feeds)</div>
+            <div class="panel-subtitle">Stored under fixtures/evidence_videos/ with cryptographic bit-exact verification</div>
+          </div>
+          <span class="tag tag-emerald">2 ACTIVE CHANNELS</span>
+        </div>
+
+        <div class="video-grid">
+          <!-- Video 1 -->
+          <div class="video-card">
+            <video class="video-frame" controls preload="metadata">
+              <source src="fixtures/evidence_videos/CAM01.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="video-meta">
+              <div class="video-title-row">
+                <span class="video-title">CAM01.mp4 — Camera Channel 01</span>
+                <span class="tag tag-primary">12.0s · 30 FPS</span>
+              </div>
+              <table class="meta-table">
+                <tr><td>RESOLUTION</td><td>640 × 480 (VGA CCTV Standard)</td></tr>
+                <tr><td>CODEC</td><td>H.264 / FMP4 Fragmented Stream</td></tr>
+                <tr><td>FILE SIZE</td><td>932,477 bytes (0.89 MB)</td></tr>
+                <tr><td>MD5</td><td>f70aa0c49172e45ae57e5418a4f7e41d</td></tr>
+                <tr><td>SHA-256</td><td class="hash-highlight">0956ec94751a20bed0f257f47b7ac56e65b34ecef1d8ce286afaed8700a83db0</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Video 2 -->
+          <div class="video-card">
+            <video class="video-frame" controls preload="metadata">
+              <source src="fixtures/evidence_videos/CAM02.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="video-meta">
+              <div class="video-title-row">
+                <span class="video-title">CAM02.mp4 — Camera Channel 02</span>
+                <span class="tag tag-primary">15.0s · 30 FPS</span>
+              </div>
+              <table class="meta-table">
+                <tr><td>RESOLUTION</td><td>640 × 480 (VGA CCTV Standard)</td></tr>
+                <tr><td>CODEC</td><td>H.264 / FMP4 Fragmented Stream</td></tr>
+                <tr><td>FILE SIZE</td><td>1,265,307 bytes (1.21 MB)</td></tr>
+                <tr><td>MD5</td><td>c8353dd8ba2d519136ce923e709b1626</td></tr>
+                <tr><td>SHA-256</td><td class="hash-highlight">394f8c0df43078486c504f691cce1f7d62d3416f837c14abe9b81021e078d68b</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Roadmap -->
+    <div id="tab-roadmap" class="tab-content" style="display:none;">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Phase 1 (Week 1) Execution Plan</div>
+            <div class="panel-subtitle">Documented in docs/PHASE_1_WEEK_1_PLAN.md for Faculty & Mentor Review</div>
+          </div>
+          <span class="tag tag-primary">7-DAY SPRINT</span>
+        </div>
+
+        <div class="days-grid" id="days-container"></div>
+        <div class="day-detail-box" id="day-detail-target"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Signature Scanner -->
+    <div id="tab-scanner" class="tab-content" style="display:none;">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Header Magic-Byte & Signature Inspector</div>
+            <div class="panel-subtitle">Non-destructive binary sector 0x0000 inspection for DVR manufacturer auto-detection</div>
+          </div>
+          <span class="tag tag-emerald">ZERO WRITE MODE</span>
+        </div>
+
+        <div class="scanner-layout">
+          <div>
+            <div class="hex-box" id="hex-dump-screen"></div>
+          </div>
+          <div class="scanner-controls">
+            <div>
+              <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.4rem; font-weight:700;">SELECT FORENSIC DISK IMAGE:</label>
+              <select class="select-input" id="vendor-selector" onchange="renderScanner()">
+                <option value="dahua">Dahua DHFS 4.1 Disk (.img)</option>
+                <option value="hikvision">Hikvision Master Sector (.raw)</option>
+                <option value="cpplus">CP Plus OEM Disk (.dd)</option>
+                <option value="generic">Generic / Unrecognized Disk</option>
+              </select>
+            </div>
+
+            <div style="background:#0d131f; border:1px solid var(--card-border); padding:1rem; border-radius:10px;">
+              <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:0.4rem;">DETECTION RESULT</div>
+              <div id="res-vendor" style="font-size:1.2rem; font-weight:800; color:var(--emerald);">DAHUA</div>
+              <div id="res-family" style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem;">DHFS 4.1 Storage Layout</div>
+              
+              <div style="font-size:0.75rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.5rem; display:flex; justify-content:space-between;">
+                <span style="color:var(--text-muted);">Magic Signature:</span>
+                <span id="res-magic" style="font-family:var(--font-mono); color:#fff; font-weight:600;">44 48 46 53 (DHFS)</span>
+              </div>
+              <div style="font-size:0.75rem; padding-top:0.35rem; display:flex; justify-content:space-between;">
+                <span style="color:var(--text-muted);">Confidence Score:</span>
+                <span id="res-conf" class="tag tag-emerald" style="padding:0.1rem 0.5rem;">HIGH</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Chain of Custody -->
+    <div id="tab-custody" class="tab-content" style="display:none;">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Genesis Chain-of-Custody (CoC) Log</div>
+            <div class="panel-subtitle">Tamper-evident ISO/IEC 27037 compliance ledger for ingested evidence</div>
+          </div>
+          <span class="tag tag-emerald">IMMUTABLE LOG</span>
+        </div>
+
+        <div class="timeline-wrap">
+          <div class="timeline-node">
+            <div class="timeline-header">
+              <span class="badge-coc">[EVENT-001] EVIDENCE_INGESTION_COMPLETED</span>
+              <span class="time-coc">2026-10-09T14:08:00Z</span>
+            </div>
+            <div style="font-size:0.85rem; font-weight:600; color:#fff; margin-top:0.25rem;">
+              Evidence Files: CAM01.mp4, CAM02.mp4
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono); margin-top:0.25rem;">
+              Dual-Hashing Verified: SHA-256 (0956ec94... & 394f8c0d...) & MD5. Read-only binary handle established. Cataloged into fixtures/evidence_videos/manifest.json.
+            </div>
+          </div>
+
+          <div class="timeline-node">
+            <div class="timeline-header">
+              <span class="badge-coc">[EVENT-002] REPO_COMMITTED_AND_PUSHED</span>
+              <span class="time-coc">2026-10-09T14:16:50Z</span>
+            </div>
+            <div style="font-size:0.85rem; font-weight:600; color:#fff; margin-top:0.25rem;">
+              Remote Synchronization to GitHub
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono); margin-top:0.25rem;">
+              Pushed branch 'main' to https://github.com/Kantu07/UDFRAS.git with commit d666e1a7e6c. All 104 project files synchronized.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div>UDFRAS — Universal DVR/NVR Forensic Analysis System · SIH26150</div>
+    <div>Local Workspace Preview · Connected to Git</div>
+  </footer>
+
+  <script>
+    const DAYS_DATA = [
+      { day: 1, title: "Ingestion Safety", file: "packages/forensics/io/readonly.py", test: "test_readonly_access.py", desc: "Strict read-only binary ingestion layer (rb mode) preventing accidental modification of source media." },
+      { day: 2, title: "Dual Hasher", file: "packages/forensics/hashing/hasher.py", test: "test_dual_hash_integrity.py", desc: "Streaming chunked 64 KB memory-safe verification computing SHA-256 & MD5 concurrently." },
+      { day: 3, title: "Signature Matrix", file: "packages/adapters/signatures.py", test: "test_signatures_detection.py", desc: "Header scanner recognizing Dahua (DHFS), Hikvision (HIKG/HKCS), and CP Plus magic offsets." },
+      { day: 4, title: "Adapter Registry", file: "packages/adapters/registry.py", test: "test_adapter_registry.py", desc: "Dynamic adapter dispatching engine with confidence scoring and unknown fallback." },
+      { day: 5, title: "Genesis CoC", file: "apps/api/app/services/evidence_service.py", test: "test_custody_service.py", desc: "SQLite initial evidence record generation with ISO/IEC 27037 chain-of-custody logging." },
+      { day: 6, title: "Synthetic Fixtures", file: "fixtures/generator/generate_fixture.py", test: "test_vendor_fixtures.py", desc: "Byte-accurate synthetic disk fixtures embedded with real CCTV footage streams." },
+      { day: 7, title: "Guide Viva Defense", file: "docs/PHASE_1_REPORT.md", test: "pytest (100% Pass)", desc: "Formal Phase 1 report generation, faculty review checklist, and viva defense presentation." }
+    ];
+
+    let currentDay = 1;
+
+    function renderDays() {
+      const container = document.getElementById('days-container');
+      container.innerHTML = DAYS_DATA.map(d => `
+        <div class="day-btn ${d.day === currentDay ? 'active' : ''}" onclick="selectDay(${d.day})">
+          <div class="day-num">Day ${d.day}</div>
+          <div class="day-headline">${d.title}</div>
+        </div>
+      `).join('');
+
+      const d = DAYS_DATA.find(x => x.day === currentDay);
+      document.getElementById('day-detail-target').innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+          <h3 style="font-size:1.05rem; font-weight:800; color:var(--text-main);">DAY ${d.day}: ${d.title}</h3>
+          <span class="tag tag-emerald">WEEK 1 OBJECTIVE</span>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">${d.desc}</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:0.78rem;">
+          <div style="background:#05080f; padding:0.75rem; border-radius:8px; border:1px solid var(--card-border);">
+            <span style="color:var(--text-muted); display:block; margin-bottom:0.25rem;">Deliverable File:</span>
+            <code style="font-family:var(--font-mono); color:var(--primary); font-weight:600;">${d.file}</code>
+          </div>
+          <div style="background:#05080f; padding:0.75rem; border-radius:8px; border:1px solid var(--card-border);">
+            <span style="color:var(--text-muted); display:block; margin-bottom:0.25rem;">Automated Test:</span>
+            <code style="font-family:var(--font-mono); color:var(--emerald); font-weight:600;">${d.test}</code>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectDay(n) {
+      currentDay = n;
+      renderDays();
+    }
+
+    const VENDORS = {
+      dahua: {
+        vendor: "DAHUA",
+        family: "Dahua DHFS 4.1 Layout",
+        magic: "44 48 46 53 (DHFS)",
+        conf: "HIGH",
+        hex: `00000000  44 48 46 53 04 01 00 00  00 00 10 00 00 00 00 00  |DHFS............|
+00000010  01 00 00 00 00 02 00 00  32 30 32 36 2d 31 30 2d  |........2026-10-|
+00000020  30 39 54 31 34 3a 30 38  00 00 00 00 00 00 00 00  |09T14:08........|`
+      },
+      hikvision: {
+        vendor: "HIKVISION",
+        family: "Hikvision Master Sector (HIKG)",
+        magic: "48 49 4b 47 (HIKG)",
+        conf: "HIGH",
+        hex: `00000000  48 49 4b 47 01 00 00 00  48 4b 43 53 00 00 20 00  |HIKG....HKCS.. .|
+00000010  56 34 2e 30 00 00 00 00  00 00 00 00 00 00 00 00  |V4.0............|
+00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|`
+      },
+      cpplus: {
+        vendor: "CP PLUS",
+        family: "CP Plus OEM (Dahua Format)",
+        magic: "44 48 46 53 (DHFS / CP)",
+        conf: "MEDIUM-HIGH",
+        hex: `00000000  44 48 46 53 02 00 00 00  43 50 20 50 4c 55 53 00  |DHFS....CP PLUS.|
+00000010  02 00 00 00 00 04 00 00  00 00 00 00 00 00 00 00  |................|
+00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|`
+      },
+      generic: {
+        vendor: "UNKNOWN",
+        family: "Standard MBR / Non-Proprietary",
+        magic: "No Recognized DVR Magic",
+        conf: "UNRECOGNIZED",
+        hex: `00000000  eb 58 90 6d 6b 66 73 2e  66 61 74 00 02 08 20 00  |.X.mkfs.fat... .|
+00000010  02 00 00 00 00 f8 00 00  3f 00 ff 00 00 00 00 00  |........?.......|
+00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|`
+      }
+    };
+
+    function renderScanner() {
+      const key = document.getElementById('vendor-selector').value;
+      const item = VENDORS[key];
+      document.getElementById('hex-dump-screen').textContent = item.hex;
+      document.getElementById('res-vendor').textContent = item.vendor;
+      document.getElementById('res-family').textContent = item.family;
+      document.getElementById('res-magic').textContent = item.magic;
+      document.getElementById('res-conf').textContent = item.conf;
+    }
+
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${id}`).style.display = 'block';
+      event.target.classList.add('active');
+    }
+
+    renderDays();
+    renderScanner();
+  </script>
+</body>
+</html>
