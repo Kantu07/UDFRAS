@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class RecoveryRequest(BaseModel):
     recording_id: str
+    output_directory: str | None = None
 
 
 class RecoveryResponse(BaseModel):

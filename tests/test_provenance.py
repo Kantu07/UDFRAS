@@ -96,6 +96,33 @@ def test_provenance_links_recovered_artifact():
     db = SessionLocal()
 
     try:
+        from app.models.recovery import RecoveryArtifactRecord
+        from app.services.recovery_service import RecoveryService
+        existing = db.query(RecoveryArtifactRecord).filter(
+            RecoveryArtifactRecord.evidence_id == EVIDENCE_ID,
+            RecoveryArtifactRecord.recording_id == "REC-003",
+        ).first()
+        if not existing:
+            artifact = RecoveryService().recover_recording(
+                evidence_id=EVIDENCE_ID,
+                evidence_path="fixtures/demo_dvr/demo_dvr.img",
+                recording_id="REC-003",
+                output_directory="artifacts/recovered",
+            )
+            rec = RecoveryArtifactRecord(
+                id=artifact.artifact_id,
+                evidence_id=artifact.evidence_id,
+                recording_id=artifact.recording_id,
+                output_path=artifact.output_path,
+                sha256=artifact.sha256,
+                size_bytes=artifact.size_bytes,
+                status=artifact.status,
+                method=artifact.method,
+                confidence=artifact.confidence,
+            )
+            db.add(rec)
+            db.commit()
+
         graph = ProvenanceService().build_graph(
             db=db,
             evidence_id=EVIDENCE_ID,
